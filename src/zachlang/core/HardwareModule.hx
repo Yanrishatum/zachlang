@@ -105,8 +105,9 @@ class HardwareModule
       case RegisterType.VValue(v):
         throw "Only registers allowed!";
       case RegisterType.VSpecial(v):
-        if (!writeSpecialRegister(v, value)) throw runtimeError("Undefined register name!");
-        return true;
+        return writeSpecialRegister(v, value);
+        // if (!writeSpecialRegister(v, value)) throw runtimeError("Undefined register name!");
+        // return true;
     }
   }
   

@@ -17,7 +17,7 @@ A TIS-100 module.
 * Ports: RIGHT/DOWN/LEFT/UP
 * Notes:
 * * Reading operation counts as sleep, and can advance time.
-* * ANY special register not implemented.
+* * ANY special register not tested.
 
 ### 诚尚Micro
 A SHENZHEN I/O ChengShangMicro module.

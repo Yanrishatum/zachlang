@@ -1,4 +1,4 @@
-# Basic PC configuration
+# Basic PC configuration (or planned to be)
 machine:
   name: "Test"
   # Interpreter options

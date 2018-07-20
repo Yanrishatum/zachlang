@@ -112,6 +112,18 @@ class TIS100 extends Hardware<TisExpr>
       stack[to] = 0;
       return true;
     }
+    if (name.toLowerCase() == "any")
+    {
+      for (port in ports)
+      {
+        if (port.hasDataInPipe())
+        {
+          port.read();
+          stack[to] = port.value;
+          return true;
+        }
+      }
+    }
     return false;
   }
   
@@ -119,6 +131,19 @@ class TIS100 extends Hardware<TisExpr>
     if (name.toLowerCase() == "nil")
     {
       return true;
+    }
+    if (name.toLowerCase() == "any")
+    {
+      for (port in ports)
+      {
+        for(pipePort in port.pipe.ports)
+        {
+          if (pipePort.state == Read)
+          {
+            return writeRegister(VPort(port), value);
+          }
+        }
+      }
     }
     return false;
   }
