@@ -1,0 +1,3 @@
+out.hl
+bin/*
+!bin/index.html

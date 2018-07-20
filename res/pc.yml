@@ -1,0 +1,41 @@
+# Basic PC configuration
+machine:
+  name: "Test"
+  # Interpreter options
+  compiler:
+    # Limit integer values to -999/999 # NOT IMPLEMENTED
+    integerLimit: false
+    # Cap the instruction count to match original hardware # NOT IMPLEMENTED
+    instructionLimit: false
+# List of all modules
+modules:
+  - type: TIS-100 # Defines module type
+    id: tis # Optional: ID of that module for linking
+    position: [10, 10] # Optional: Position on screen, defaults to [0, 0]
+    size: [150, 200] # Optional: Minimum size. It's only a min size, it can grow beyond those guidelines.
+    # Optional: Add custom registers. Makes sense only for programmable modules.
+    registers:
+      - id: "mem"
+        writeable: true
+        readable: true
+    # Optional: Add custom ports.
+    ports:
+      - id: "x0"
+        blocking: true
+        writeable: true
+        readable: true
+    # Per-module configuration
+    program: | # Program of the module.
+      nop
+  - type: CSMicro
+    id: cs
+    position: [160, 10]
+    size: [150, 200]
+    program: |
+      nop
+  - type: NumberInput
+    id: ni
+    position: [320, 10]
+link:
+  - [tis#x0, csm#x0]
+  - [tis#up, ni#num]

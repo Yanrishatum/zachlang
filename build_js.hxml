@@ -1,0 +1,11 @@
+-lib hscript
+-lib heaps
+-cp src
+-debug
+-D js=true
+-D analyzer-optimize
+-main Main
+-js bin/out.js
+
+# --next
+# --cmd hl out.hl

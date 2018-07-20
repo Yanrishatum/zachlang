@@ -1,0 +1,12 @@
+-lib hscript
+-lib heaps
+-lib hldx
+-cp src
+-debug
+-D hl=true
+-D analyzer-optimize
+-main Main
+-hl out.hl
+
+# --next
+--cmd hl out.hl
