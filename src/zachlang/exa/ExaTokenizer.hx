@@ -35,7 +35,6 @@ class ExaTokenizer extends Tokenizer<ExaToken, ExaExpr>
                   {
                     throw new HardwareError("Label with name '" + name + "' already exists!", line, HardwareErrorType.Compiler);
                   }
-                  trace("LABEL: " + tk);
                   hw.labels.set(name, line);
                 default:
                   throw new HardwareError("Could not create mark, expected mark name, got: " + tk, line, HardwareErrorType.Compiler);
@@ -102,7 +101,6 @@ class ExaTokenizer extends Tokenizer<ExaToken, ExaExpr>
             default:
               
           }
-          trace(list[list.length - 1].e, list[list.length - 1].line);
           debug = false;
         default:
           
