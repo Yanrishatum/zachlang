@@ -43,7 +43,6 @@ class Port extends Register
   // Happens when there is data in pipe
   public function notifyWrite(by:Port)
   {
-    trace(name, state);
     if (state == PortState.Listen)
     {
       state = Idle;
