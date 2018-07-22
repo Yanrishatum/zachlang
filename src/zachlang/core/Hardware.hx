@@ -39,7 +39,7 @@ class Hardware<EX> extends HardwareModule
       {
         position = i;
         jumped = true;
-        nextInsutrction();
+        validateInstruciton();
         return;
       }
       i++;
@@ -53,7 +53,7 @@ class Hardware<EX> extends HardwareModule
     if (position < 0) position = 0;
     else if (position >= program.length) position = program.length - 1;
     jumped = true;
-    nextInsutrction();
+    validateInstruciton();
   }
   
   override public function reset():Void
@@ -70,17 +70,23 @@ class Hardware<EX> extends HardwareModule
     execute(e);
     if (!blocked)
     {
-      if (!jumped) nextInsutrction();
+      if (!jumped) nextInstruction();
       else jumped = false;
       
-      if (program[position].breakpoint) runtimeError("Debug breakpoint");
+      if (program[position].breakpoint) throw runtimeError("Debug breakpoint");
     }
   }
   
-  private function nextInsutrction()
+  private function nextInstruction()
   {
     position++;
     if (position == program.length) position = 0;
+    validateInstruciton();
+  }
+  
+  private function validateInstruciton()
+  {
+    
   }
   
   private function execute(e:Expr<EX>):Void

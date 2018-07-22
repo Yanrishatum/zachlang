@@ -109,7 +109,7 @@ class TIS100 extends Hardware<TisExpr>
   override function readSpecialRegister(name:String, to:Int):Bool {
     if (name.toLowerCase() == "nil")
     {
-      stack[to] = 0;
+      storeInteger(to, 0);
       return true;
     }
     if (name.toLowerCase() == "any")
@@ -119,7 +119,7 @@ class TIS100 extends Hardware<TisExpr>
         if (port.hasDataInPipe())
         {
           port.read();
-          stack[to] = port.value;
+          storeRegister(to, port);
           return true;
         }
       }
@@ -127,7 +127,7 @@ class TIS100 extends Hardware<TisExpr>
     return false;
   }
   
-  override function writeSpecialRegister(name:String, value:Int):Bool {
+  override function writeSpecialRegister(name:String, value:Int, keyword:String):Bool {
     if (name.toLowerCase() == "nil")
     {
       return true;
@@ -140,7 +140,7 @@ class TIS100 extends Hardware<TisExpr>
         {
           if (pipePort.state == Read)
           {
-            return writeRegister(VPort(port), value);
+            return writeRegister(VPort(port), value, keyword);
           }
         }
       }

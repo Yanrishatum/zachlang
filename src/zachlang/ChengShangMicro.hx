@@ -146,7 +146,7 @@ class ChengShangMicro extends Hardware<CSMExpr>
         else blocked = true;
       case Dst(pos, val):
         readRegister(val, 1);
-        if (readRegister(pos, 0) && stackState[1])
+        if (readRegister(pos, 0) && stackState[1].isInteger())
         {
           var mul:Float = Math.pow(10, stack[0]);
           var digit:Int = Std.int((acc.value / mul) % 10);
@@ -158,7 +158,7 @@ class ChengShangMicro extends Hardware<CSMExpr>
       // Test
       case Teq(left, right):
         readRegister(right, 1);
-        if (readRegister(left, 0) && stackState[1])
+        if (readRegister(left, 0) && stackState[1].isInteger())
         {
           test = stack[0] == stack[1] ? META_CONDITIONAL_TRUE : META_CONDITIONAL_FALSE;
           clearStack();
@@ -166,7 +166,7 @@ class ChengShangMicro extends Hardware<CSMExpr>
         else blocked = true;
       case Tgt(left, right):
         readRegister(right, 1);
-        if (readRegister(left, 0) && stackState[1])
+        if (readRegister(left, 0) && stackState[1].isInteger())
         {
           test = stack[0] > stack[1] ? META_CONDITIONAL_TRUE : META_CONDITIONAL_FALSE;
           clearStack();
@@ -174,7 +174,7 @@ class ChengShangMicro extends Hardware<CSMExpr>
         else blocked = true;
       case Tlt(left, right):
         readRegister(right, 1);
-        if (readRegister(left, 0) && stackState[1])
+        if (readRegister(left, 0) && stackState[1].isInteger())
         {
           test = stack[0] < stack[1] ? META_CONDITIONAL_TRUE : META_CONDITIONAL_FALSE;
           clearStack();
@@ -182,7 +182,7 @@ class ChengShangMicro extends Hardware<CSMExpr>
         else blocked = true;
       case Tcp(left, right):
         readRegister(right, 1);
-        if (readRegister(left, 0) && stackState[1])
+        if (readRegister(left, 0) && stackState[1].isInteger())
         {
           test = stack[0] == stack[1] ? 0 : (stack[0] > stack[1] ? META_CONDITIONAL_TRUE : META_CONDITIONAL_FALSE);
           clearStack();
@@ -200,7 +200,7 @@ class ChengShangMicro extends Hardware<CSMExpr>
     return false;
   }
   
-  override function writeSpecialRegister(name:String, value:Int):Bool {
+  override function writeSpecialRegister(name:String, value:Int, value:String):Bool {
     if (name.toLowerCase() == "null")
     {
       return true;
@@ -223,7 +223,12 @@ class ChengShangMicro extends Hardware<CSMExpr>
     super.goToLabel(label);
   }
   
-  override function nextInsutrction() {
+  override function nextInstruction() {
+    markExpr(program[position]);
+    super.nextInstruction();
+  }
+  
+  override function validateInstruciton() {
     
     inline function next()
     {
@@ -231,12 +236,6 @@ class ChengShangMicro extends Hardware<CSMExpr>
       if (position == program.length) position = 0;
     }
     var start:Int = position;
-    
-    if (!jumped)
-    {
-      markExpr(program[position]);
-      next();
-    }
     
     var expr:Expr<CSMExpr>;
     
@@ -260,7 +259,7 @@ class ChengShangMicro extends Hardware<CSMExpr>
   
   override function onPipeDataAvailable(local:Port) {
     sleeping = false; // slx command
-    nextInsutrction();
+    nextInstruction();
   }
   
 }

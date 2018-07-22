@@ -95,6 +95,7 @@ class TisTokenizer extends Tokenizer<TisToken, TisExpr>
         switch(str.toLowerCase())
         {
           case "nil": return RegisterType.VSpecial("nil");
+          case "any": return RegisterType.VSpecial("any");
           default:
             throw new HardwareError("Unknown register name: " + str, line, HardwareErrorType.Compiler);
         }

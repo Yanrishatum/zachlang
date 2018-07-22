@@ -25,6 +25,7 @@ class Port extends Register
     pipe.writes.remove(this);
     pipe.latestValue = 0;
     value = 0;
+    keyword = "";
   }
   
   public function listen():Void
@@ -87,6 +88,20 @@ class Port extends Register
     if (state == Idle)
     {
       value = v;
+      state = Writing;
+    }
+    else if (state == WriteDone)
+    {
+      state = Idle;
+      return true;
+    }
+    return !blocking;
+  }
+  
+  override function writeKeyword(value:String):Bool {
+    if (state == Idle)
+    {
+      keyword = value;
       state = Writing;
     }
     else if (state == WriteDone)

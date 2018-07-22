@@ -16,6 +16,7 @@ import gui.AppSprite;
 import zachlang.ChengShangMicro;
 import gui.NumModule;
 import gui.VisModule;
+import zachlang.ExaProto;
 
 class Main extends hxd.App
 {
@@ -30,13 +31,16 @@ class Main extends hxd.App
     var tis:TIS100 = new TIS100();
     var sz:ChengShangMicro = new ChengShangMicro();
     var vis:VisualizationModule = new VisualizationModule();
+    var exa:ExaProto = new ExaProto();
     
     tis.compile(Res.program.entry.getText());
     sz.compile(Res.shenzhen.entry.getText());
+    exa.compile(Res.exa.entry.getText());
     
     pc.addHardware(tis);
     pc.addHardware(sz);
     pc.addHardware(vis);
+    pc.addHardware(exa);
     
     tis.connectPort(tis.ports.get("right"), sz.ports.get("x0"));
     vis.init(36, 22);
@@ -46,6 +50,7 @@ class Main extends hxd.App
     sprites.push(new TisModule(cast tis, s2d));
     sprites.push(new TisModule(cast sz, s2d, 200));
     sprites.push(new VisModule(vis, s2d, 20, 140));
+    sprites.push(new TisModule(cast exa, s2d, 400));
   }
   
   private var updateFrame:Int = 0;
@@ -64,13 +69,18 @@ class Main extends hxd.App
     {
       updateFrame = 0;
       pc.update();
+      if (pc.paused)
+      {
+        running = false;
+        pc.resume();
+      }
     }
     for (s in sprites) s.update();
   }
   
   static function main() {
     #if js
-    hxd.Res.initEmbed();
+    hxd.Res.initEmbed());
     #else
     hxd.Res.initLocal();
     #end

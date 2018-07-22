@@ -9,6 +9,7 @@ class PortPipe
   public var blocking:Bool;
   
   public var latestValue:Int;
+  public var latestKeyword:String;
   
   public var writes:Array<Port>;
   public var onRequestWrites:Array<Port>; // Non blocking, have lowest priority.
@@ -29,7 +30,8 @@ class PortPipe
     {
       writes.push(by);
     }
-    latestValue = by.value;
+    if (by.storedKeyword) latestKeyword = by.keyword;
+    else latestValue = by.value;
     
     for (p in ports)
     {
@@ -49,19 +51,30 @@ class PortPipe
       {
         if (port.getPersistentData())
         {
-          latestValue = by.value = port.value;
+          if (port.storedKeyword)
+            latestKeyword = by.keyword = port.keyword;
+          else
+            latestValue = by.value = port.value;
+          by.storedKeyword = port.storedKeyword;
           return true;
         }
       }
       if (!blocking)
       {
+        // TODO: Type
         by.value = latestValue;
+        by.keyword = latestKeyword;
         return true;
       }
       return false;
     }
     var other:Port = writes.shift();
-    by.value = other.value;
+    // TODO: Type
+    if (other.storedKeyword)
+      by.keyword = other.keyword;
+    else
+      by.value = other.value;
+    by.storedKeyword = other.storedKeyword;
     other.notifyRead(by);
     return true;
   }

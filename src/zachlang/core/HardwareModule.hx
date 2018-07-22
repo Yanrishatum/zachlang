@@ -3,6 +3,8 @@ package zachlang.core;
 import haxe.ds.Vector;
 import haxe.ds.Map;
 
+typedef HWSS = HardwareStackState;
+
 // Base for all connectable modules.
 class HardwareModule
 {
@@ -17,8 +19,9 @@ class HardwareModule
   // Is in "sleep" mode.
   public var sleeping:Bool;
   
-  private var stackState:Vector<Bool>;
+  private var stackState:Vector<HardwareStackState>;
   private var stack:Vector<Int>;
+  private var keywords:Vector<String>;
   
   public function new()
   {
@@ -26,6 +29,7 @@ class HardwareModule
     this.ports = new Map();
     this.stackState = new Vector(VALUE_STACK_LIMIT);
     this.stack = new Vector(VALUE_STACK_LIMIT);
+    this.keywords = new Vector(VALUE_STACK_LIMIT);
   }
   
   public function addRegister(reg:Register):Void
@@ -52,26 +56,25 @@ class HardwareModule
     {
       case RegisterType.VRegister(r):
         if (!r.readable) throw runtimeError("Trying to read unreachable register!");
-        stack[to] = r.value;
-        stackState[to] = true;
+        storeRegister(to, r);
         return true;
       case RegisterType.VPort(p):
         if (!p.readable) throw runtimeError("Trying to read unreachable port!");
         if (p.read())
         {
-          stack[to] = p.value;
-          stackState[to] = true;
+          storeRegister(to, p);
           return true;
         }
         return false;
       case RegisterType.VValue(v):
-        stack[to] = v;
-        stackState[to] = true;
+        storeInteger(to, v);
+        return true;
+      case RegisterType.VKeyword(v):
+        storeKeyword(to, v);
         return true;
       case RegisterType.VSpecial(s):
         if(readSpecialRegister(s, to))
         {
-          stackState[to] = true;
           return true;
         }
         return false;
@@ -84,28 +87,43 @@ class HardwareModule
     if (!port.readable) throw runtimeError("Trying to read unreachable port!");
     if (port.read())
     {
-      stack[to] = port.value;
-      stackState[to] = true;
+      if (port.storedKeyword)
+      {
+        storeKeyword(to, port.keyword);
+      }
+      else
+      {
+        storeInteger(to, port.value);
+      }
+      
       return true;
     }
     return false;
   }
   
-  private function writeRegister(t:RegisterType, value:Int):Bool
+  private function writeRegister(t:RegisterType, value:Int, ?keyword:String):Bool
   {
+    if (keyword == null) keyword = "";
+    var isKeyword = keyword != "";
     switch(t)
     {
       case RegisterType.VRegister(r):
         if (!r.writeable) throw runtimeError("Trying to write unreachable register!");
-        r.value = value;
+        if (isKeyword && !r.allowKeywords) throw runtimeError("Trying to write keyword to integer register!");
+        else if (!isKeyword && !r.allowIntegers) throw runtimeError("Trying to write integer to keyword register!");
+        isKeyword ? r.writeKeyword(keyword) : r.write(value);
         return true;
       case RegisterType.VPort(p):
         if (!p.writeable) throw runtimeError("Trying to write unreachable port!");
-        return p.write(value);
+        if (isKeyword && !p.allowKeywords) throw runtimeError("Trying to write keyword to integer register!");
+        else if (!isKeyword && !p.allowIntegers) throw runtimeError("Trying to write integer to keyword register!");
+        return isKeyword ? p.writeKeyword(keyword) : p.write(value);
       case RegisterType.VValue(v):
         throw "Only registers allowed!";
+      case RegisterType.VKeyword(str):
+        throw "Only registers allowed!";
       case RegisterType.VSpecial(v):
-        return writeSpecialRegister(v, value);
+        return writeSpecialRegister(v, value, keyword);
         // if (!writeSpecialRegister(v, value)) throw runtimeError("Undefined register name!");
         // return true;
     }
@@ -118,7 +136,7 @@ class HardwareModule
   }
   
   // In case of VSpecial register, write to it.
-  private function writeSpecialRegister(name:String, value:Int):Bool
+  private function writeSpecialRegister(name:String, value:Int, keyword:String):Bool
   {
     return false;
   }
@@ -154,11 +172,43 @@ class HardwareModule
     
   }
   
+  private function readInteger(from:Int):Int
+  {
+    if (stackState[from] != HWSS.INTVAL) throw runtimeError("[not an int] Can't read integer from stack @ " + from + "!");
+    else return stack[from];
+  }
+  
+  private function readKeyword(from:Int):String
+  {
+    if (stackState[from] != HWSS.KEYVAL) throw  runtimeError("[not a keyword] Can't read keyword from stack @ " + from + "!");
+    else return keywords[from];
+  }
+  
+  private inline function storeRegister(to:Int, reg:Register):Void
+  {
+    if (reg.storedKeyword) storeKeyword(to, reg.keyword);
+    else storeInteger(to, reg.value);
+  }
+  
+  private inline function storeInteger(to:Int, v:Int):Void
+  {
+    stack[to] = v;
+    keywords[to] = "";
+    stackState[to] = HWSS.INTVAL;
+  }
+  
+  private inline function storeKeyword(to:Int, kw:String):Void
+  {
+    stack[to] = kw.charCodeAt(0);
+    keywords[to] = kw;
+    stackState[to] = HWSS.KEYVAL;
+  }
+  
   private inline function clearStack():Void
   {
     for (i in 0...VALUE_STACK_LIMIT)
     {
-      stackState[i] = false;
+      stackState[i] = HWSS.EMPTY;
     }
   }
   
