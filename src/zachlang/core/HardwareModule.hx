@@ -43,6 +43,20 @@ class HardwareModule
     else this.registers.set(reg.name, reg);
   }
   
+  public function removeRegister(reg:Register):Void
+  {
+    if (Std.is(reg, Port))
+    {
+      var p:Port = cast reg;
+      p.module = null;
+      this.ports.remove(p.name);
+    }
+    else 
+    {
+      this.registers.remove(reg.name);
+    }
+  }
+  
   public function connectPort(local:Port, remote:Port):Void
   {
     local.connectToPipe(remote.pipe);
@@ -127,6 +141,16 @@ class HardwareModule
         // if (!writeSpecialRegister(v, value)) throw runtimeError("Undefined register name!");
         // return true;
     }
+  }
+  
+  private function writePort(p:Port, value:Int, ?keyword:String):Bool
+  {
+    if (!p.writeable) throw runtimeError("Trying to write unreachable port!");
+    if (keyword == null) keyword = "";
+    var isKeyword = keyword != "";
+    if (isKeyword && !p.allowKeywords) throw runtimeError("Trying to write keyword to integer register!");
+    else if (!isKeyword && !p.allowIntegers) throw runtimeError("Trying to write integer to keyword register!");
+    return isKeyword ? p.writeKeyword(keyword) : p.write(value);
   }
   
   // In case of VSpecial register, read from it.

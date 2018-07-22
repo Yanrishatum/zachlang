@@ -1,5 +1,6 @@
 package zachlang;
 
+import zachlang.exa.ExaHardware;
 import zachlang.core.HardwareModule.HWSS;
 import haxe.io.StringInput;
 import zachlang.core.Hardware;
@@ -40,9 +41,31 @@ class ExaProto extends Hardware<ExaExpr>
     //addRegister(new Register("co", true, true, 0));
   }
   
+  public function attach(node:ExaHardware):Void
+  {
+    for (other in node.ports)
+    {
+      var port:Port = new Port("#" + other.name.toLowerCase(), other.readable, other.writeable, true);
+      addRegister(port);
+      connectPort(port, other);
+    }
+  }
+  
+  public function detach(node:ExaHardware):Void
+  {
+    for (other in node.ports)
+    {
+      var port:Port = ports.get("#" + other.name.toLowerCase());
+      port.disconnect();
+      removeRegister(port);
+    }
+  }
+  
   override function compile(source:String):Void
   {
     this.source = source;
+    this.labels = new Map();
+    
     program = tokenizer.tokenize(this, new StringInput(source));
   }
   
@@ -279,6 +302,18 @@ class ExaProto extends Hardware<ExaExpr>
   }
   
   override function readSpecialRegister(name:String, to:Int):Bool {
+    if (name.charCodeAt(0) == '#'.code)
+    {
+      name = name.toLowerCase();
+      for (p in ports)
+      {
+        if (name == p.name)
+        {
+          return readPort(p, to);
+        }
+      }
+      return false;
+    }
     if (name.toLowerCase() == "null")
     {
       storeInteger(to, 0);
@@ -287,7 +322,18 @@ class ExaProto extends Hardware<ExaExpr>
     return false;
   }
   
-  override function writeSpecialRegister(name:String, value:Int, value:String):Bool {
+  override function writeSpecialRegister(name:String, value:Int, keyword:String):Bool {
+    if (name.charCodeAt(0) == '#'.code)
+    {
+      for (p in ports)
+      {
+        if (name == p.name)
+        {
+          return writePort(p, value, keyword);
+        }
+      }
+      return false;
+    }
     if (name.toLowerCase() == "null")
     {
       return true;

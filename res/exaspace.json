@@ -1,0 +1,23 @@
+{
+  "hosts":
+  [
+    { "name": "h1", "capacity": 0 },
+    { "name": "h2", "capacity": 0 },
+    { "name": "h3", "capacity": 0 },
+    { "name": "h4", "capacity": 0 }
+  ],
+  "link":
+  [
+    ["EXA_ZERO@800", "h1@400"],
+    ["h1@800", "h2@-1"],
+    ["h2@800", "h3@-1"],
+    ["h3@800", "h4@-1"],
+    ["h4@800", "h1@-1"]
+  ],
+  "data":
+  [
+    { "type": "file", "id": 200, "data": [0, 1, "kappa"], "host": "h2" },
+    { "type": "exa", "data": "noop", "host": "h1" },
+    { "type": "file_indexer", "host": "h3" }
+  ]
+}

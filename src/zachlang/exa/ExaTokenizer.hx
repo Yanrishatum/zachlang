@@ -127,12 +127,12 @@ class ExaTokenizer extends Tokenizer<ExaToken, ExaExpr>
         if (allowNumber)
           return RegisterType.VValue(i);
         else
-          throw new HardwareError("Expected register, got number", line, HardwareErrorType.Compiler);
+          throw new HardwareError("Expected register, got integer: " + i, line, HardwareErrorType.Compiler);
       case TMinus:
         if (allowNumber)
           return RegisterType.VValue(-getInt());
         else 
-          throw new HardwareError("Expected register, got number", line, HardwareErrorType.Compiler);
+          throw new HardwareError("Expected register, got '-'", line, HardwareErrorType.Compiler);
       case TKeyword(str):
         if (allowNumber)
           return RegisterType.VKeyword(str);
@@ -157,7 +157,8 @@ class ExaTokenizer extends Tokenizer<ExaToken, ExaExpr>
           case "eof": return RegisterType.VSpecial("eof");
           case "mrd": return RegisterType.VSpecial("mrd");
           default:
-            throw new HardwareError("Unknown register name: " + str, line, HardwareErrorType.Compiler);
+            if (str.charCodeAt(0) == '#'.code) return RegisterType.VSpecial(str.toLowerCase());
+            else throw new HardwareError("Unknown register name: " + str, line, HardwareErrorType.Compiler);
         }
       default:
         throw new HardwareError("Expected register, got " + tk, line, HardwareErrorType.Compiler);

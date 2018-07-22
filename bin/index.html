@@ -4,8 +4,31 @@
     <title>Zachlang</title>
   </head>
   <body style="margin:0;padding:0;background-color:black">
-
-    <canvas id="webgl" style="width:100%;height:100%"></canvas>
+    <div style="display:flex; flex-direction: row; width: 100%; height: 100%">
+      <div>
+        <textarea id="sources" style="min-width: 300px; width: 100%; height: calc(100% - 40px);">link 800
+grab 200
+wipe
+make
+link 800
+copy 'Why' F
+copy 'hello' F
+copy 'there!' F
+copy 200 #index
+link -1
+drop
+copy 3 X
+mark loop
+link 800
+subi X 1 X
+test X = 0
+fjmp loop</textarea>
+        <button id="recompile">Recompile</button>
+      </div>
+      <div style="flex-grow: 2">
+        <canvas id="webgl" style="width:100%;height:100%"></canvas>
+      </div>
+    </div>
     <script type="text/javascript" src="out.js"></script>
 
   </body>

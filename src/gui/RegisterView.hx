@@ -9,7 +9,7 @@ class RegisterView extends AppSprite
 {
   
   private var machine:HardwareModule;
-  private var acc:Text;
+  public var acc:Text;
   
   public function new(machine:HardwareModule, parent:Sprite)
   {

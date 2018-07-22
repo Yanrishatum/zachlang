@@ -13,6 +13,7 @@ class ExaHost
   
   public var exas:Array<ExaProto>;
   public var files:Array<ExaFile>;
+  public var nodes:Array<ExaHardware>;
   
   // public var capacity:Int;
   
@@ -22,6 +23,7 @@ class ExaHost
     this.links = new Map();
     this.exas = new Array<ExaProto>();
     this.files = new Array<ExaFile>();
+    this.nodes = new Array();
   }
   
   public inline function linkTo(index:Int, other:ExaHost)
@@ -36,12 +38,14 @@ class ExaHost
       if (exa.host != null) exa.host.removeExa(exa);
       exas.push(exa);
       exa.host = this;
+      for (node in nodes) exa.attach(node);
     }
   }
   
   public inline function removeExa(exa:ExaProto):Void
   {
     exas.remove(exa);
+    for (node in nodes) exa.detach(node);
     exa.host = null;
   }
   
